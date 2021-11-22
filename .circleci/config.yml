@@ -40,22 +40,26 @@ jobs:
       - run:
           name: Run js tests
           command: ./bin/dc.sh run test ./bin/run-mocha-tests.sh
-      - run:
-          name: Build prod image
-          command: DOCKER_BUILDKIT=1 ./bin/dc.sh build --progress=plain prod
-      - run:
-          name: Push prod image
-          command: |
-            docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
-            source docker/bin/set_git_env_vars.sh
-            docker push mozilla/kitsune:prod-${GIT_COMMIT_SHORT}
-            docker logout
-      - aws-cli/setup
-      - run:
-          name: Upload staticfiles
-          command: |
-            source docker/bin/set_git_env_vars.sh
-            ./docker/bin/upload-staticfiles-circleci.sh
+      - when:
+          condition:
+            equal: [ new-build-pipeline-pretend-master, << pipeline.git.branch >> ]
+          steps:
+            - run:
+                name: Build prod image
+                command: DOCKER_BUILDKIT=1 ./bin/dc.sh build --progress=plain prod
+            - run:
+                name: Push prod image
+                command: |
+                  docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+                  source docker/bin/set_git_env_vars.sh
+                  docker push mozilla/kitsune:prod-${GIT_COMMIT_SHORT}
+                  docker logout
+            - aws-cli/setup
+            - run:
+                name: Upload staticfiles
+                command: |
+                  source docker/bin/set_git_env_vars.sh
+                  ./docker/bin/upload-staticfiles-circleci.sh
 workflows:
   version: 2
   lint-test-build:
