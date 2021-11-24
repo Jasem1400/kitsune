@@ -81,10 +81,7 @@ RUN cp .env-test .env && \
 ##########################
 FROM base-frontend AS prod-deps
 
-ARG LOCALE_ENV=main
-ENV LOCALE_ENV=${LOCALE_ENV}
-RUN ./docker/bin/fetch-l10n-files.sh && \
-    ./scripts/compile-linted-mo.sh && \
+RUN ./scripts/l10n-fetch-lint-compile.sh && \
     find ./locale ! -name '*.mo' -type f -delete && \
     ./manage.py compilejsi18n && \
     # minify jsi18n files:

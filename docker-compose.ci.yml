@@ -16,5 +16,4 @@ services:
       target: prod
       args:
         - GIT_SHA
-        - LOCALE_ENV
     image: mozilla/kitsune:prod-${GIT_COMMIT_SHORT:-latest}
